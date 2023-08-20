@@ -4,6 +4,14 @@ Elf32_Ehdr *ehdr;
 Elf32_Phdr *phdr;
 int fd;
 
+// // typedef int (*StartFunction)();
+// int (*_start)(void);
+// int (*_start)(void){
+//     entry_addr = (void*)_start;
+//     int(*addr)() = (int(*)())entry_addr;
+//     return addr();
+// }
+
 /*
  * release memory and other cleanups
  */
@@ -23,16 +31,21 @@ void load_and_run_elf(char* exe) {
 
   char *heap_mem;
   heap_mem = (char*)malloc(fd_size);
-  printf("Heap Memory Allocated\n");
+  // printf("Heap Memory Allocated\n");
 
   ssize_t file_read = read(fd, heap_mem, fd_size);
-  printf("File reading Done\n");
+  // printf("File reading Done\n");
+  // printf("Address of heap: %p\n", (void*)heap_mem);
 
   ehdr = (Elf32_Ehdr *)heap_mem; 
+  // printf("Address of ehdr: %p\n", (void*)ehdr);
+
   phdr = (Elf32_Phdr *)(heap_mem + ehdr->e_phoff);
+  // printf("offset: %d\n", ehdr->e_phoff);
+  // printf("Address of phdr: %p\n", (void*)phdr);
 
   unsigned int entry = ehdr->e_entry;
-  printf("Entry Point address is %x\n",entry);
+  // printf("Entry Point address is %#x\n",entry);
 
   // printf("Program Headers: %d\n", ehdr->e_phnum);
   // printf("size of Program Headers: %d\n", ehdr->e_phentsize);
@@ -41,51 +54,28 @@ void load_and_run_elf(char* exe) {
   while(tmp->p_type != PT_LOAD){
     tmp++;
   }
-  if(tmp->p_type == PT_LOAD){
-    printf("FOUND\n");
-    // printf("%d\n",tmp->p_type);
-  }
-  else{
-    printf("NOT FOUND\n");
-  }
+  // if(tmp->p_type == PT_LOAD){
+  //   printf("FOUND\n");
+  //   // printf("%d\n",tmp->p_type);
+  // }
+  // else{
+  //   printf("NOT FOUND\n");
+  // }
   void* virtual_mem = mmap(NULL,tmp->p_memsz,PROT_READ|PROT_WRITE|PROT_EXEC, MAP_ANONYMOUS|MAP_PRIVATE, 0,0);
-  memcpy(virtual_mem,heap_mem+tmp->p_offset,tmp->p_memsz);
+  memcpy(virtual_mem,ehdr+tmp->p_offset,tmp->p_memsz);
 
-  void* start = virtual_mem + (entry - tmp->p_vaddr);
-  // printf("Entry Point Address in Memory: %p\n", start);
-  while(start!="e_entrypoint"){
-    start++;
-  }
-  if (start=="e_entrypoint"){
-    printf("FOUND the entry point\n");
-    printf("%p\n",start);
-  }
-  else{
-    printf("Not found\n");
-  }
-  if (start) {
-    typedef int (*StartFunction)();
+  //  for (ssize_t i = 0; i < tmp->p_memsz; i++) {
+  //     printf("%02x ", ((unsigned char*)virtual_mem)[i]);
+  //     if ((i + 1) % 16 == 0) {
+  //         printf("\n");
+  //     }
+  // }
 
-    // Cast the start address to the function pointer type
-    StartFunction start_function = (StartFunction)start;
-
-    // Call the "_start" function and print the returned value
-    int result = start_function();
-    printf("User _start return value = %d\n", result);
-  } else {
-    printf("Unable to locate _start function.\n");
-  }
-
+  void* entry_addr = virtual_mem + (entry - tmp->p_vaddr);
+  printf("Entry Point Address in Memory: %p\n", entry_addr);
   close(fd);
-  int result = _start();
-  printf("User _start return value = %d\n",result);
 
-      //  for (ssize_t i = 0; i < tmp->p_memsz; i++) {
-    //     printf("%02x ", ((unsigned char*)virtual_mem)[i]);
-    //     if ((i + 1) % 16 == 0) {
-    //         printf("\n");
-    //     }
-    // }
+  
 
   // 1. Load entire binary content into the memory from the ELF file.
   // 2. Iterate through the PHDR table and find the section of PT_LOAD 
@@ -95,6 +85,9 @@ void load_and_run_elf(char* exe) {
   // 4. Navigate to the entrypoint address into the segment loaded in the memory in above step
   // 5. Typecast the address to that of function pointer matching "_start" method in fib.c.
   // 6. Call the "_start" method and print the value returned from the "_start"
+
+  // int result = _start();
+  // printf("User _start return value = %d\n",result);
 }
 
 int main(int argc, char** argv) 
