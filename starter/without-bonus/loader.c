@@ -45,6 +45,13 @@ void load_and_run_elf(char* exe) {
   else{
     printf("NOT FOUND\n");
   }
+
+      //  for (ssize_t i = 0; i < file_read; i++) {
+    //     printf("%02x ", heap_mem[i]);
+    //     if ((i + 1) % 16 == 0) {
+    //         printf("\n");
+    //     }
+    // }
   // 1. Load entire binary content into the memory from the ELF file.
   // 2. Iterate through the PHDR table and find the section of PT_LOAD 
   //    type that contains the address of the entrypoint method in fib.c
