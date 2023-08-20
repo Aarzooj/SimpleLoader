@@ -14,8 +14,37 @@ void loader_cleanup() {
 /*
  * Load and run the ELF executable file
  */
-void load_and_run_elf(char** exe) {
-  fd = open(argv[1], O_RDONLY);
+void load_and_run_elf(char* exe) {
+  fd = open(exe, O_RDONLY);
+
+  off_t fd_size = lseek(fd,0,SEEK_END);
+  lseek(fd,0,SEEK_SET);
+  printf("File size: %lld\n", (long long)fd_size);
+
+  char *heap_mem;
+  heap_mem = (char*)malloc(fd_size);
+  printf("Heap Memory Allocated\n");
+
+  ssize_t file_read = read(fd, heap_mem, fd_size);
+  printf("File reading Done\n");
+
+  ehdr = (Elf32_Ehdr *)heap_mem; 
+  phdr = (Elf32_Phdr *)(heap_mem + ehdr->e_phoff);
+
+  printf("Program Headers: %d\n", ehdr->e_phnum);
+  printf("size of Program Headers: %d\n", ehdr->e_phentsize);
+  printf("Offset of Program Headers: %d\n", ehdr->e_phoff);
+  Elf32_Phdr * tmp = phdr;
+  while(tmp->p_type != PT_LOAD){
+    tmp++;
+  }
+  if(tmp->p_type == PT_LOAD){
+    printf("FOUND\n");
+    printf("%d\n",tmp->p_vaddr);
+  }
+  else{
+    printf("NOT FOUND\n");
+  }
   // 1. Load entire binary content into the memory from the ELF file.
   // 2. Iterate through the PHDR table and find the section of PT_LOAD 
   //    type that contains the address of the entrypoint method in fib.c
