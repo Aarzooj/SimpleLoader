@@ -19,7 +19,7 @@ void loader_cleanup()
 /*
  * Load and run the ELF executable file
  */
-void load_and_run_elf(char *exe)
+void load_and_run_elf(char **exe)
 {
   // 1. Load entire binary content into the memory from the ELF file.
   // 2. Iterate through the PHDR table and find the section of PT_LOAD
@@ -31,7 +31,7 @@ void load_and_run_elf(char *exe)
   // 6. Call the "_start" method and print the value returned from the "_start"
 
   // 1. reading the file and loading it into memory
-  fd = open(exe, O_RDONLY);
+  fd = open(*exe, O_RDONLY);
 
   off_t fd_size = lseek(fd, 0, SEEK_END);
   lseek(fd, 0, SEEK_SET);
@@ -90,7 +90,7 @@ void load_and_run_elf(char *exe)
       if (virtual_mem == MAP_FAILED)
       {
         perror("Error: Memory mapping failed");
-        free(heap_mem);
+        // free(heap_mem);
         exit(1);
       }
 
@@ -122,6 +122,7 @@ void load_and_run_elf(char *exe)
     free(heap_mem);
     exit(1);
   }
+  close(fd);
 }
 
 int main(int argc, char **argv)
@@ -143,7 +144,7 @@ int main(int argc, char **argv)
   fclose(elfFile);
 
   // 2. passing it to the loader for carrying out the loading/execution
-  load_and_run_elf(argv[1]);
+  load_and_run_elf(&argv[1]);
 
   // 3. invoke the cleanup routine inside the loader
   loader_cleanup();
