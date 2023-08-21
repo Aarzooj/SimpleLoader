@@ -103,6 +103,7 @@ void load_and_run_elf(char **exe)
         break;
       }
     }
+    i++;
     tmp++;
   }
 
