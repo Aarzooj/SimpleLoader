@@ -42,13 +42,22 @@ void load_and_run_elf(char* exe) {
   // printf("size of Program Headers: %d\n", ehdr->e_phentsize);
   // printf("Offset of Program Headers: %d\n", ehdr->e_phoff);
   Elf32_Phdr * tmp = phdr;
-  while(tmp->p_type != PT_LOAD){
+  int total_phdr = ehdr->e_phnum;
+  void* virtual_mem;
+  void* entry_addr;
+  int i = 0;
+  while (i < total_phdr){
+    if (tmp->p_type == PT_LOAD){
+        virtual_mem = mmap(NULL,tmp->p_memsz,PROT_READ|PROT_WRITE|PROT_EXEC, MAP_ANONYMOUS|MAP_PRIVATE, 0,0);
+        memcpy(virtual_mem,heap_mem+tmp->p_offset,tmp->p_memsz);
+        entry_addr = virtual_mem + (entry - tmp->p_vaddr);
+        if (entry_addr>virtual_mem && entry_addr<(virtual_mem+tmp->p_offset)){
+          break;
+        }
+    }
     tmp++;
   }
-  tmp++;
 
-  void* virtual_mem = mmap(NULL,tmp->p_memsz,PROT_READ|PROT_WRITE|PROT_EXEC, MAP_ANONYMOUS|MAP_PRIVATE, 0,0);
-  memcpy(virtual_mem,heap_mem+tmp->p_offset,tmp->p_memsz);
 
   //  for (ssize_t i = 0; i < tmp->p_memsz; i++) {
   //     printf("%02x ", ((unsigned char*)virtual_mem)[i]);
@@ -57,7 +66,6 @@ void load_and_run_elf(char* exe) {
   //     }
   // }
 
-  void* entry_addr = virtual_mem + (entry - tmp->p_vaddr);
   // printf("Entry Point Address in Memory: %p\n", entry_addr);
   // printf("Virtual mem start: %p\n", virtual_mem);
   // printf("Virtual mem end: %p\n", virtual_mem + tmp->p_memsz);
