@@ -4,9 +4,6 @@ all:
 	cd launcher && $(MAKE)
 	cd test && $(MAKE)
 	make install
-	cd bin
-	ar rs lib_simpleloader.so loader launch
-	trash *.o
 
 #move the lib_simpleloader.so and launch binaries inside bin directory
 install:
