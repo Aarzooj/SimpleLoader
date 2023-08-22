@@ -4,7 +4,7 @@ all:
 	cd launcher && $(MAKE)
 	cd test && $(MAKE)
 	make install
-	cd launcher && gcc -m32 -o launch -L../bin -l_simpleloader launch.c
+	cd launcher && gcc -m32 -L../bin -Wl,-rpath=../bin -Wall -o launch launch.c -l_simpleloader
 	cp launcher/launch bin/
 
 #move the lib_simpleloader.so and launch binaries inside bin directory
