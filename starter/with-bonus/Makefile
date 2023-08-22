@@ -12,7 +12,7 @@ install:
 	mkdir -p bin
 	cp loader/loader.o bin/
 	cp launcher/launch.o bin/
-	gcc -shared -o lib_simpleloader.so ./bin/loader.o .bin/launch.o
+	gcc -shared -o lib_simpleloader.so ./bin/loader.o ./bin/launch.o
 
 #Provide the command for cleanup
 clean:
