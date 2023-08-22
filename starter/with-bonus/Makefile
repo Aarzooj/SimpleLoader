@@ -5,13 +5,12 @@ all:
 	cd test && $(MAKE)
 	make install
 	cd launcher && gcc -m32 -o launch -L../bin -l_simpleloader launch.c
+	cp launcher/launch bin/
 
 #move the lib_simpleloader.so and launch binaries inside bin directory
 install:
 	mkdir -p bin
-	cp loader/loader.o bin/
-	cp launcher/launch.o bin/
-	cd bin && gcc -m32 -shared -o lib_simpleloader.so loader.o launch.o
+	cd bin && gcc -m32 -shared -o lib_simpleloader.so ../loader/loader.o
 
 #Provide the command for cleanup
 clean:

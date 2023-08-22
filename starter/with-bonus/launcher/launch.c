@@ -1,6 +1,6 @@
 #include "../loader/loader.h"
 
-int main1(int argc, char** argv) 
+int main(int argc, char** argv) 
 {
   if(argc != 2) {
     printf("Usage: %s <ELF Executable> \n",argv[0]);
