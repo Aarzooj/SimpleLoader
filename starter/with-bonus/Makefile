@@ -1,19 +1,18 @@
 #invoke make inside following directories and in this order: loader, launch, fib
 all:
-	mkdir -p bin
 	cd loader && $(MAKE)
 	cd launcher && $(MAKE)
 	cd test && $(MAKE)
 	make install
+	cd launcher
+	gcc -o launch -L../bin -l_simpleloader launch.c
 
 #move the lib_simpleloader.so and launch binaries inside bin directory
 install:
+	mkdir -p bin
 	cp loader/loader.o bin/
 	cp launcher/launch.o bin/
-	cp test/fib bin/
-	cd bin
-	gcc -shared -o lib_simpleloader.so loader.o launch.o
-	gcc -m32 -o fib -L. -l_simpleloader
+	gcc -shared -o lib_simpleloader.so ./bin/loader.o .bin/launch.o
 
 #Provide the command for cleanup
 clean:
