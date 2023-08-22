@@ -10,7 +10,7 @@ all:
 #move the lib_simpleloader.so and launch binaries inside bin directory
 install:
 	mkdir -p bin
-	cd bin && gcc -m32 -shared -o lib_simpleloader.so ../loader/loader.o
+	cd bin && gcc -m32 -shared -o lib_simpleloader.so ../loader/loader.c
 
 #Provide the command for cleanup
 clean:
