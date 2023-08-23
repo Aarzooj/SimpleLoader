@@ -11,8 +11,8 @@ void loader_cleanup()
 {
   // freeing the memory for globally defined variables
   ehdr = NULL;
-  phdr = NULL;
   free(ehdr);
+  phdr = NULL;
   free(phdr);
 }
 
@@ -22,15 +22,6 @@ void loader_cleanup()
 void load_and_run_elf(char **exe)
 {
   // 1. Load entire binary content into the memory from the ELF file.
-  // 2. Iterate through the PHDR table and find the section of PT_LOAD
-  //    type that contains the address of the entrypoint method in fib.c
-  // 3. Allocate memory of the size "p_memsz" using mmap function
-  //    and then copy the segment content
-  // 4. Navigate to the entrypoint address into the segment loaded in the memory in above step
-  // 5. Typecast the address to that of function pointer matching "_start" method in fib.c.
-  // 6. Call the "_start" method and print the value returned from the "_start"
-
-  // 1. reading the file and loading it into memory
   fd = open(*exe, O_RDONLY);
 
   off_t fd_size = lseek(fd, 0, SEEK_END);
@@ -65,6 +56,7 @@ void load_and_run_elf(char **exe)
     printf("Unsupported elf file");
     exit(1);
   }
+
   // program header
   phdr = (Elf32_Phdr *)(heap_mem + ehdr->e_phoff);
 
@@ -77,24 +69,25 @@ void load_and_run_elf(char **exe)
   void *entry_addr;
   int i = 0;
 
-  // 2. Iterating through phdr to find the section of the PT_LOAD containing the entrypoint address
+  // 2. Iterate through the PHDR table and find the section of PT_LOAD
+  //    type that contains the address of the entrypoint method in fib.c
   while (i < total_phdr)
   {
     if (tmp->p_type == PT_LOAD)
     {
-      // 3. loading the segment in virtual memory
+      // 3. Allocate memory of the size "p_memsz" using mmap function
+      //    and then copy the segment content
       virtual_mem = mmap(NULL, tmp->p_memsz, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
       memcpy(virtual_mem, heap_mem + tmp->p_offset, tmp->p_memsz);
 
-      //verifying if memory mapping was successful
+      // verifying if memory mapping was successful
       if (virtual_mem == MAP_FAILED)
       {
         perror("Error: Memory mapping failed");
-        // free(heap_mem);
         exit(1);
       }
 
-      // 4. entry point address in the virtual memory
+      // 4. Navigate to the entrypoint address into the segment loaded in the memory in above step
       entry_addr = virtual_mem + (entry - tmp->p_vaddr);
 
       // checking if the entry point address lies within the boundaries of virtual memory
@@ -109,10 +102,10 @@ void load_and_run_elf(char **exe)
 
   if (entry_addr != NULL)
   {
-    // 5. typecasting the address into the function pointer
+    // 5. Typecast the address to that of function pointer matching "_start" method in fib.c.
     int (*_start)(void) = (int (*)(void))entry_addr;
 
-    // 6. printing the result
+    // 6. Call the "_start" method and print the value returned from the "_start"
     int result = _start();
     printf("User _start return value = %d\n", result);
   }
