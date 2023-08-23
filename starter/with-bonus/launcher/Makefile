@@ -4,4 +4,4 @@ all:
 
 #Provide the command for cleanup
 clean:
-	-@rm -f launch.o
+	-@rm -f launch.o launch
