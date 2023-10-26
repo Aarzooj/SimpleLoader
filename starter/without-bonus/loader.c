@@ -91,7 +91,7 @@ void load_and_run_elf(char **exe)
       entry_addr = virtual_mem + (entry - tmp->p_vaddr);
 
       // checking if the entry point address lies within the boundaries of virtual memory
-      if (entry_addr > virtual_mem && entry_addr < (virtual_mem + tmp->p_offset))
+      if (entry_addr >= virtual_mem && entry_addr <= (virtual_mem + tmp->p_offset))
       {
         break;
       }
